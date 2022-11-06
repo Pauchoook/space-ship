@@ -15,6 +15,28 @@ let timer = 0;
 let timerMeteor = 60;
 let timerFire = 50;
 
+const countHtml = document.querySelector('#count');
+const gameEnd = document.querySelector('#game-over');
+const btnReload = document.querySelector('#reload');
+const gameStart = document.querySelector('#game-start');
+const btnStart = document.querySelector('#start');
+const record = document.querySelector('#record');
+
+window.onload = () => {
+   if (localStorage.getItem('record')) {
+      record.textContent = `Рекорд: ${localStorage.getItem('record')}`;
+   } else {
+      localStorage.setItem('record', 0);
+   }
+}
+
+btnStart.onclick = () => {
+   gameStart.remove();
+   canvas.style.cursor = 'none';
+   game();
+}
+btnReload.onclick = () => location.reload();
+
 const imagesMeteors = [meteorImg, meteorImg_1, meteorImg_2, meteorImg_3];
 
 const canvas = document.getElementById('canvas');
@@ -49,9 +71,9 @@ const objPlayer = {
    life: true
 }
 
-background.onload = () => {
-   game();
-}
+// background.onload = () => {
+//    game();
+// }
 
 const requestAnimFrame = (function() {
    return window.requestAnimationFrame ||
@@ -217,8 +239,13 @@ const physics = () => {
                animY: 0
             });
 
+            // звук взрыва
             const boom = new Audio(boomAudio);
             boom.play();
+
+            // счётчик
+            count++;
+            countHtml.textContent = count;
 
             // помечаем метеорит сбитым
             meteor.del = true;
@@ -230,6 +257,14 @@ const physics = () => {
          // если произошло столкновение с игроком
          if (Math.abs(meteor.x + meteor.width / 2 - objPlayer.x - objPlayer.width / 2) < meteor.width && Math.abs(meteor.y - objPlayer.y) < meteor.height) {
             objPlayer.life = false;
+            gameEnd.style.display = 'flex';
+            canvas.style.cursor = 'auto';
+
+            const recordCount = localStorage.getItem('record');
+
+            if (recordCount && +recordCount < count) {
+               localStorage.setItem('record', count);
+            }
          }
       }
 
